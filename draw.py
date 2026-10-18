@@ -5,20 +5,27 @@ import torch
 import torch.nn.functional as F
 import numpy as np
 import matplotlib.pyplot as plt
+from PIL import Image, ImageDraw, ImageTk
 from model import CNNModel
 
 model = CNNModel()
 model.load_state_dict(torch.load("mnist_model.pth"))
 model.eval()
 
-class App:
+class DrawApp:
     def __init__(self, master):
         self.master = master
         self.master.title("MNIST CNN")
         
-        self.canvas = tk.Canvas(master, width=280, height=280, bg='black')
+        # 内存图像：280x280 白色背景
+        self.image = Image.new('L', (280, 280), 255)  # 255 = 白色
+        self.draw = ImageDraw.Draw(self.image)
+        
+        # 画布（仅用于显示，不作为截图来源）
+        self.canvas = tk.Canvas(master, width=280, height=280, bg='white')
         self.canvas.pack()
         
+        # 按钮
         self.button_predict = tk.Button(master, text="Predict", command=self.predict)
         self.button_predict.pack(side='left')
         
@@ -28,45 +35,65 @@ class App:
         self.button_debug = tk.Button(master, text="Debug", command=self.debug_visuals)
         self.button_debug.pack(side='right')
         
+        # 绘图绑定
         self.last_x, self.last_y = None, None
-        self.canvas.bind('<B1-Motion>', self.draw)
+        self.canvas.bind('<B1-Motion>', self.on_draw)
         self.canvas.bind('<ButtonRelease-1>', self.reset_last)
-
-    def reset_last(self, event):
-        self.last_x, self.last_y = None, None
-
-    def draw(self, event):
+        
+        # # 加载模型
+        # self.model = MNISTCNN()
+        # self.model.load_state_dict(torch.load('mnist_model.pth', map_location='cpu'))
+        # self.model.eval()
+    
+    def on_draw(self, event):
+        """鼠标拖动时同时在画布和内存图像上画线"""
         x, y = event.x, event.y
-        if self.last_x and self.last_y:
+        if self.last_x is not None and self.last_y is not None:
+            # 在画布上画线（用于显示）
             self.canvas.create_line(
                 self.last_x, self.last_y, x, y,
-                width=10, fill='white', capstyle='round', smooth=True
+                width=15,
+                fill='black',
+                capstyle='round',
+                smooth=True
+            )
+            # 在内存图像上画线（用于预测）
+            self.draw.line(
+                [self.last_x, self.last_y, x, y],
+                fill=0,       # 0 = 黑色
+                width=15
             )
         self.last_x, self.last_y = x, y
     
-    def clear(self):
-        self.canvas.delete("all")
+    def reset_last(self, event):
         self.last_x, self.last_y = None, None
     
+    def clear(self):
+        """清除画布和内存图像"""
+        self.canvas.delete('all')
+        self.image = Image.new('L', (280, 280), 255)
+        self.draw = ImageDraw.Draw(self.image)
+    
     def get_processed_image(self):
-        x = self.master.winfo_rootx() + self.canvas.winfo_x()
-        y = self.master.winfo_rooty() + self.canvas.winfo_y()
-        x1 = x + self.canvas.winfo_width()
-        y1 = y + self.canvas.winfo_height()
-        img = ImageGrab.grab().crop((x, y, x1, y1)).convert('L')
-        img = img.resize((28,28))
-        
-        img_array = np.array(img) / 255.0
+        """从内存图像直接获取模型输入（无需截图）"""
+        img_resized = self.image.resize((28, 28), Image.LANCZOS)
+        img_array = np.array(img_resized) / 255.0
+        # 模型期望：白底黑字，值范围[-1,1]，形状(1,1,28,28)
+        img_array = 1.0 - img_array
         img_tensor = torch.tensor(img_array, dtype=torch.float32).unsqueeze(0).unsqueeze(0)
         img_tensor = (img_tensor - 0.5) / 0.5
         return img_array, img_tensor
     
     def predict(self):
+        """执行预测并显示结果"""
         _, img_tensor = self.get_processed_image()
         with torch.no_grad():
             output = model(img_tensor)
-            prediction = torch.argmax(output, dim=1).item()
-        messagebox.showinfo("Prediction", f"The number is : {prediction}")
+            pred = output.argmax(dim=1).item()
+            prob = torch.nn.functional.softmax(output, dim=1)[0][pred].item()
+        print(f"Prediction: {pred} (confidence: {prob:.2%})")
+        # 可选：弹窗显示
+        # tk.messagebox.showinfo("Result", f"Predicted: {pred}")
     
     def debug_visuals(self):
         img_array, img_tensor = self.get_processed_image()
@@ -115,8 +142,7 @@ class App:
         plt.tight_layout()
         plt.show()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     root = tk.Tk()
-    app = App(root)
+    app = DrawApp(root)
     root.mainloop()
