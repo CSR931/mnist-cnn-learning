@@ -83,7 +83,10 @@ git push origin main
 
 
 ### draw.py
-解决**原仓库代码识别率极低**，只会猜测0和8问题：
+## 解决**原仓库代码识别率极低**，只会猜测0和8问题：
+问题示例
+<img width="1110" height="462" alt="89f8f9fc4c1cdae0d5829c55865ee6eb" src="https://github.com/user-attachments/assets/4e7532d1-ce49-4e59-ae3a-cd4a921945bd" />
+
 
 1.Windows 系统在高 DPI 缩放（如 125%、150%）下，winfo_rootx() 返回的逻辑坐标与实际物理像素坐标不一致。
 直接使用 winfo_rootx() + canvas.winfo_x() 会导致截图区域向左/上偏移，截到窗口边框。
@@ -99,6 +102,7 @@ def get_processed_image(self):
         return img_array, img_tensor
 ```
 改为内存绘图，只记录笔迹，不再出现窗口边缘
+
 img_tensor = (img_tensor - 0.5) / 0.5对齐训练时的归一化参数
 
 
