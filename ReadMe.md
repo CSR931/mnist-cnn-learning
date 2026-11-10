@@ -49,7 +49,7 @@ Check it out here: [https://aitaneuh-mnist-cnn.streamlit.app/](https://aitaneuh-
 ```
 
 ---
-## 学习成果
+## <mark>学习成果<mark>
 bash
 ```
 cd mnist-cnn-learning
@@ -83,7 +83,7 @@ git push origin main
 
 
 ### draw.py
-## 解决**原仓库代码识别率极低**，只会猜测0和8问题：
+### <mark>解决**原仓库代码识别率极低**，只会猜测0和8问题：<mark>
 问题示例
 <img width="1110" height="462" alt="89f8f9fc4c1cdae0d5829c55865ee6eb" src="https://github.com/user-attachments/assets/4e7532d1-ce49-4e59-ae3a-cd4a921945bd" />
 
