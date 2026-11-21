@@ -72,6 +72,7 @@ git push origin main
  28x28       提取边缘特征      提取数字部件      变成长列表       综合判断       0~9的得分
  1个通道     (32个通道)       (64个通道)       3136个数值      128个特征     10个分数
 ```
+<mark>模型架构：一个经典的两层卷积 + 全连接的 CNN<mark>
 
 **概念辨析：**
 
@@ -115,7 +116,9 @@ self.canvas.create_line(..., fill='black', ...)  # 黑笔
 ```
 img_array = 1.0 - img_array
 ```
-
+### 训练过程和<mark>识别率验证<mark>
+<img width="506" height="231" alt="屏幕截图 2026-10-18 111110" src="https://github.com/user-attachments/assets/ddc70348-32ee-40c1-ac1c-c46b12dd3f80" />
+<img width="338" height="142" alt="屏幕截图 2026-10-18 120910" src="https://github.com/user-attachments/assets/ccd825e1-156d-463b-892c-94bc13c131ea" />
 
 
 
