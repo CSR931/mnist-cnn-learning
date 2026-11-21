@@ -5,10 +5,10 @@ import torch.nn.functional as F
 class CNNModel(nn.Module):
     def __init__(self):
         super(CNNModel, self).__init__()
-        self.conv1 = nn.Conv2d(1, 32, kernel_size=3, padding=1)
+        self.conv1 = nn.Conv2d(1, 32, kernel_size=3, padding=1)    # 1->32通道
         self.bn1 = nn.BatchNorm2d(32)   # normalisation
 
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)    # 32->64通道
         self.bn2 = nn.BatchNorm2d(64)
         self.pool = nn.MaxPool2d(2, 2)
 
@@ -19,9 +19,9 @@ class CNNModel(nn.Module):
 
     def forward(self, x):
         # 第一卷积块
-        x = self.pool(F.relu(self.bn1(self.conv1(x))))  # [32,14,14]
+        x = self.pool(F.relu(self.bn1(self.conv1(x))))  # [batch,32,14,14]
         # 第二卷积块
-        x = self.pool(F.relu(self.bn2(self.conv2(x))))  # [64,7,7]
+        x = self.pool(F.relu(self.bn2(self.conv2(x))))  # [batch,64,7,7]
 
         x = x.view(-1, 64*7*7)      # 展平为64*7*7=3136维
         x = F.relu(self.fc1(x))     #3136->128
